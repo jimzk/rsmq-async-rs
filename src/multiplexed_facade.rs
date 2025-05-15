@@ -62,97 +62,100 @@ impl Rsmq {
             scripts,
         })
     }
+
+    /// Returns the connection to the Redis server
+    pub fn get_connection(&self) -> redis::aio::MultiplexedConnection {
+        self.connection.0.clone()
+    }
 }
 
 impl RsmqConnection for Rsmq {
     async fn change_message_visibility(
-        &mut self,
+        &self,
         qname: &str,
         message_id: &str,
         hidden: Duration,
     ) -> RsmqResult<()> {
+        let mut conn = self.get_connection();
         self.functions
-            .change_message_visibility(
-                &mut self.connection.0,
-                qname,
-                message_id,
-                hidden,
-                &self.scripts,
-            )
+            .change_message_visibility(&mut conn, qname, message_id, hidden, &self.scripts)
             .await
     }
 
     async fn create_queue(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
         maxsize: Option<i32>,
     ) -> RsmqResult<()> {
+        let mut conn = self.get_connection();
         self.functions
-            .create_queue(&mut self.connection.0, qname, hidden, delay, maxsize)
+            .create_queue(&mut conn, qname, hidden, delay, maxsize)
             .await
     }
 
-    async fn delete_message(&mut self, qname: &str, id: &str) -> RsmqResult<bool> {
-        self.functions
-            .delete_message(&mut self.connection.0, qname, id)
-            .await
+    async fn delete_message(&self, qname: &str, id: &str) -> RsmqResult<bool> {
+        let mut conn = self.get_connection();
+        self.functions.delete_message(&mut conn, qname, id).await
     }
-    async fn delete_queue(&mut self, qname: &str) -> RsmqResult<()> {
-        self.functions
-            .delete_queue(&mut self.connection.0, qname)
-            .await
+    async fn delete_queue(&self, qname: &str) -> RsmqResult<()> {
+        let mut conn = self.get_connection();
+        self.functions.delete_queue(&mut conn, qname).await
     }
-    async fn get_queue_attributes(&mut self, qname: &str) -> RsmqResult<RsmqQueueAttributes> {
-        self.functions
-            .get_queue_attributes(&mut self.connection.0, qname)
-            .await
+    async fn get_queue_attributes(&self, qname: &str) -> RsmqResult<RsmqQueueAttributes> {
+        let mut conn = self.get_connection();
+        self.functions.get_queue_attributes(&mut conn, qname).await
     }
 
-    async fn list_queues(&mut self) -> RsmqResult<Vec<String>> {
-        self.functions.list_queues(&mut self.connection.0).await
+    async fn list_queues(&self) -> RsmqResult<Vec<String>> {
+        let mut conn = self.get_connection();
+        self.functions.list_queues(&mut conn).await
     }
 
     async fn pop_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
     ) -> RsmqResult<Option<RsmqMessage<E>>> {
+        let mut conn = self.get_connection();
         self.functions
-            .pop_message::<E>(&mut self.connection.0, qname, &self.scripts)
+            .pop_message::<E>(&mut conn, qname, &self.scripts)
             .await
     }
 
     async fn receive_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
     ) -> RsmqResult<Option<RsmqMessage<E>>> {
+        let mut conn = self.get_connection();
         self.functions
-            .receive_message::<E>(&mut self.connection.0, qname, hidden, &self.scripts)
+            .receive_message::<E>(&mut conn, qname, hidden, &self.scripts)
             .await
     }
 
     async fn send_message<E: Into<RedisBytes> + Send>(
-        &mut self,
+        &self,
         qname: &str,
         message: E,
         delay: Option<Duration>,
     ) -> RsmqResult<String> {
+        let mut conn = self.get_connection();
         self.functions
-            .send_message(&mut self.connection.0, qname, message, delay)
+            .send_message(&mut conn, qname, message, delay)
             .await
     }
 
     async fn set_queue_attributes(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
         maxsize: Option<i64>,
     ) -> RsmqResult<RsmqQueueAttributes> {
+        let mut conn = self.get_connection();
         self.functions
-            .set_queue_attributes(&mut self.connection.0, qname, hidden, delay, maxsize)
+            .set_queue_attributes(&mut conn, qname, hidden, delay, maxsize)
             .await
     }
 }

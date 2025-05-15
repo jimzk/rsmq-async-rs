@@ -90,13 +90,12 @@ impl RsmqSync {
 
 impl RsmqConnectionSync for RsmqSync {
     fn change_message_visibility(
-        &mut self,
+        &self,
         qname: &str,
         message_id: &str,
         hidden: Duration,
     ) -> RsmqResult<()> {
         let mut conn = self.client.get_connection()?;
-
         self.functions.change_message_visibility(
             &mut conn,
             qname,
@@ -107,82 +106,73 @@ impl RsmqConnectionSync for RsmqSync {
     }
 
     fn create_queue(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
         maxsize: Option<i32>,
     ) -> RsmqResult<()> {
         let mut conn = self.client.get_connection()?;
-
         self.functions
             .create_queue(&mut conn, qname, hidden, delay, maxsize)
     }
 
-    fn delete_message(&mut self, qname: &str, id: &str) -> RsmqResult<bool> {
+    fn delete_message(&self, qname: &str, id: &str) -> RsmqResult<bool> {
         let mut conn = self.client.get_connection()?;
-
         self.functions.delete_message(&mut conn, qname, id)
     }
-    fn delete_queue(&mut self, qname: &str) -> RsmqResult<()> {
+    fn delete_queue(&self, qname: &str) -> RsmqResult<()> {
         let mut conn = self.client.get_connection()?;
-
         self.functions.delete_queue(&mut conn, qname)
     }
-    fn get_queue_attributes(&mut self, qname: &str) -> RsmqResult<RsmqQueueAttributes> {
+    fn get_queue_attributes(&self, qname: &str) -> RsmqResult<RsmqQueueAttributes> {
         let mut conn = self.client.get_connection()?;
-
         self.functions.get_queue_attributes(&mut conn, qname)
     }
 
-    fn list_queues(&mut self) -> RsmqResult<Vec<String>> {
+    fn list_queues(&self) -> RsmqResult<Vec<String>> {
         let mut conn = self.client.get_connection()?;
-
         self.functions.list_queues(&mut conn)
     }
 
     fn pop_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
     ) -> RsmqResult<Option<RsmqMessage<E>>> {
         let mut conn = self.client.get_connection()?;
-
         self.functions
             .pop_message::<E>(&mut conn, qname, &self.scripts)
     }
 
     fn receive_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
     ) -> RsmqResult<Option<RsmqMessage<E>>> {
         let mut conn = self.client.get_connection()?;
-
         self.functions
             .receive_message::<E>(&mut conn, qname, hidden, &self.scripts)
     }
 
     fn send_message<E: Into<RedisBytes> + Send>(
-        &mut self,
+        &self,
         qname: &str,
         message: E,
         delay: Option<Duration>,
     ) -> RsmqResult<String> {
         let mut conn = self.client.get_connection()?;
-
         self.functions
             .send_message(&mut conn, qname, message, delay)
     }
 
     fn set_queue_attributes(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
         maxsize: Option<i64>,
     ) -> RsmqResult<RsmqQueueAttributes> {
         let mut conn = self.client.get_connection()?;
-
         self.functions
             .set_queue_attributes(&mut conn, qname, hidden, delay, maxsize)
     }

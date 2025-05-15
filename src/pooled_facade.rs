@@ -142,7 +142,7 @@ impl PooledRsmq {
 
 impl RsmqConnection for PooledRsmq {
     async fn change_message_visibility(
-        &mut self,
+        &self,
         qname: &str,
         message_id: &str,
         hidden: Duration,
@@ -155,7 +155,7 @@ impl RsmqConnection for PooledRsmq {
     }
 
     async fn create_queue(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
@@ -168,30 +168,30 @@ impl RsmqConnection for PooledRsmq {
             .await
     }
 
-    async fn delete_message(&mut self, qname: &str, id: &str) -> RsmqResult<bool> {
+    async fn delete_message(&self, qname: &str, id: &str) -> RsmqResult<bool> {
         let mut conn = self.pool.get().await?;
 
         self.functions.delete_message(&mut conn, qname, id).await
     }
-    async fn delete_queue(&mut self, qname: &str) -> RsmqResult<()> {
+    async fn delete_queue(&self, qname: &str) -> RsmqResult<()> {
         let mut conn = self.pool.get().await?;
 
         self.functions.delete_queue(&mut conn, qname).await
     }
-    async fn get_queue_attributes(&mut self, qname: &str) -> RsmqResult<RsmqQueueAttributes> {
+    async fn get_queue_attributes(&self, qname: &str) -> RsmqResult<RsmqQueueAttributes> {
         let mut conn = self.pool.get().await?;
 
         self.functions.get_queue_attributes(&mut conn, qname).await
     }
 
-    async fn list_queues(&mut self) -> RsmqResult<Vec<String>> {
+    async fn list_queues(&self) -> RsmqResult<Vec<String>> {
         let mut conn = self.pool.get().await?;
 
         self.functions.list_queues(&mut conn).await
     }
 
     async fn pop_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
     ) -> RsmqResult<Option<RsmqMessage<E>>> {
         let mut conn = self.pool.get().await?;
@@ -202,7 +202,7 @@ impl RsmqConnection for PooledRsmq {
     }
 
     async fn receive_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
     ) -> RsmqResult<Option<RsmqMessage<E>>> {
@@ -214,7 +214,7 @@ impl RsmqConnection for PooledRsmq {
     }
 
     async fn send_message<E: Into<RedisBytes> + Send>(
-        &mut self,
+        &self,
         qname: &str,
         message: E,
         delay: Option<Duration>,
@@ -227,7 +227,7 @@ impl RsmqConnection for PooledRsmq {
     }
 
     async fn set_queue_attributes(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,

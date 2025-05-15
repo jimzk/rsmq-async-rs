@@ -10,7 +10,7 @@ pub trait RsmqConnection {
     ///
     /// `hidden` has a max time of 9_999_999 for compatibility reasons to this library JS version counterpart
     fn change_message_visibility(
-        &mut self,
+        &self,
         qname: &str,
         message_id: &str,
         hidden: Duration,
@@ -26,7 +26,7 @@ pub trait RsmqConnection {
     /// maxsize: Maximum size in bytes of each message in the queue. Needs to be between 1024 or 65536 or -1 (unlimited
     /// size)
     fn create_queue(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
@@ -37,26 +37,26 @@ pub trait RsmqConnection {
     ///
     /// Important to use when you are using receive_message.
     fn delete_message(
-        &mut self,
+        &self,
         qname: &str,
         id: &str,
     ) -> impl Future<Output = RsmqResult<bool>> + Send;
 
     /// Deletes the queue and all the messages on it
-    fn delete_queue(&mut self, qname: &str) -> impl Future<Output = RsmqResult<()>> + Send;
+    fn delete_queue(&self, qname: &str) -> impl Future<Output = RsmqResult<()>> + Send;
 
     /// Returns the queue attributes and statistics
     fn get_queue_attributes(
-        &mut self,
+        &self,
         qname: &str,
     ) -> impl Future<Output = RsmqResult<RsmqQueueAttributes>> + Send;
 
     /// Returns a list of queues in the namespace
-    fn list_queues(&mut self) -> impl Future<Output = RsmqResult<Vec<String>>> + Send;
+    fn list_queues(&self) -> impl Future<Output = RsmqResult<Vec<String>>> + Send;
 
     /// Deletes and returns a message. Be aware that using this you may end with deleted & unprocessed messages.
     fn pop_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
     ) -> impl Future<Output = RsmqResult<Option<RsmqMessage<E>>>> + Send;
 
@@ -66,7 +66,7 @@ pub trait RsmqConnection {
     ///
     /// `hidden` has a max time of 9_999_999 for compatibility reasons to this library JS version counterpart.
     fn receive_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
     ) -> impl Future<Output = RsmqResult<Option<RsmqMessage<E>>>> + Send;
@@ -74,7 +74,7 @@ pub trait RsmqConnection {
     /// Sends a message to the queue. The message will be delayed some time (controlled by the "delayed" argument or
     /// the queue settings) before being delivered to a client.
     fn send_message<E: Into<RedisBytes> + Send>(
-        &mut self,
+        &self,
         qname: &str,
         message: E,
         delay: Option<Duration>,
@@ -91,7 +91,7 @@ pub trait RsmqConnection {
     /// maxsize: Maximum size in bytes of each message in the queue. Needs to be between 1024 or 65536 or -1 (unlimited
     /// size)
     fn set_queue_attributes(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
@@ -107,7 +107,7 @@ pub trait RsmqConnectionSync {
     /// * `message_id` - ID of the message to modify
     /// * `hidden` - New hidden duration. Has a max time of 9_999_999 for compatibility reasons with the JS version
     fn change_message_visibility(
-        &mut self,
+        &self,
         qname: &str,
         message_id: &str,
         hidden: Duration,
@@ -121,7 +121,7 @@ pub trait RsmqConnectionSync {
     /// * `delay` - Time messages will be delayed before delivery
     /// * `maxsize` - Maximum message size in bytes (1024-65536 or -1 for unlimited)
     fn create_queue(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
@@ -135,29 +135,29 @@ pub trait RsmqConnectionSync {
     /// # Arguments
     /// * `qname` - Name of the queue
     /// * `id` - ID of the message to delete
-    fn delete_message(&mut self, qname: &str, id: &str) -> RsmqResult<bool>;
+    fn delete_message(&self, qname: &str, id: &str) -> RsmqResult<bool>;
 
     /// Deletes the queue and all messages in it
     ///
     /// # Arguments
     /// * `qname` - Name of the queue to delete
-    fn delete_queue(&mut self, qname: &str) -> RsmqResult<()>;
+    fn delete_queue(&self, qname: &str) -> RsmqResult<()>;
 
     /// Returns the queue attributes and statistics
     ///
     /// # Arguments
     /// * `qname` - Name of the queue
-    fn get_queue_attributes(&mut self, qname: &str) -> RsmqResult<RsmqQueueAttributes>;
+    fn get_queue_attributes(&self, qname: &str) -> RsmqResult<RsmqQueueAttributes>;
 
     /// Returns a list of queues in the namespace
-    fn list_queues(&mut self) -> RsmqResult<Vec<String>>;
+    fn list_queues(&self) -> RsmqResult<Vec<String>>;
 
     /// Deletes and returns a message. Be aware that using this you may end with deleted & unprocessed messages.
     ///
     /// # Arguments
     /// * `qname` - Name of the queue
     fn pop_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
     ) -> RsmqResult<Option<RsmqMessage<E>>>;
 
@@ -169,7 +169,7 @@ pub trait RsmqConnectionSync {
     /// * `qname` - Name of the queue
     /// * `hidden` - Optional custom hidden duration. Max 9_999_999
     fn receive_message<E: TryFrom<RedisBytes, Error = Vec<u8>>>(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
     ) -> RsmqResult<Option<RsmqMessage<E>>>;
@@ -182,7 +182,7 @@ pub trait RsmqConnectionSync {
     /// * `message` - Message content to send
     /// * `delay` - Optional custom delay duration
     fn send_message<E: Into<RedisBytes> + Send>(
-        &mut self,
+        &self,
         qname: &str,
         message: E,
         delay: Option<Duration>,
@@ -197,7 +197,7 @@ pub trait RsmqConnectionSync {
     /// * `delay` - Time messages will be delayed before delivery
     /// * `maxsize` - Maximum message size in bytes (1024-65536 or -1 for unlimited)
     fn set_queue_attributes(
-        &mut self,
+        &self,
         qname: &str,
         hidden: Option<Duration>,
         delay: Option<Duration>,
